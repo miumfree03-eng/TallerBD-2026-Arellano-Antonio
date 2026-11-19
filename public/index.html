@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio · Préstamos de equipo</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header class="encabezado">
+    <div class="contenedor">
+      <a class="marca" href="index.html">Préstamos de equipo<small>Soporte y Servicios Tecnológicos</small></a>
+      <button class="boton-menu" type="button" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <nav class="navegacion">
+        <ul class="menu">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="equipos.html">Equipos</a></li>
+          <li><a href="solicitantes.html">Solicitantes</a></li>
+          <li><a href="prestamos.html">Préstamos</a></li>
+          <li><a href="devoluciones.html">Devoluciones</a></li>
+          <li><a href="consultas.html">Consultas</a></li>
+        </ul>
+      </nav>
+      <div class="usuario-sesion oculto-movil">Encargado: <strong>admin</strong> · <a href="login.html">Salir</a></div>
+    </div>
+  </header>
+
+  <main class="contenedor">
+    <h1>Panel de control</h1>
+    <p class="subtitulo">Situación actual de los equipos del departamento.</p>
+
+    <!-- En el backend, estos números se calcularán con consultas a MariaDB -->
+    <section class="resumen">
+      <div class="indicador verde"><div class="numero">18</div><div class="etiqueta">Disponibles</div></div>
+      <div class="indicador"><div class="numero">7</div><div class="etiqueta">Prestados</div></div>
+      <div class="indicador ambar"><div class="numero">2</div><div class="etiqueta">En mantenimiento</div></div>
+      <div class="indicador rojo"><div class="numero">1</div><div class="etiqueta">Préstamos vencidos</div></div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>¿Qué quieres hacer?</h2>
+      <div class="accesos">
+        <a class="acceso" href="prestamos.html"><strong>Registrar préstamo</strong>Entregar un equipo disponible a un solicitante.</a>
+        <a class="acceso" href="devoluciones.html"><strong>Registrar devolución</strong>Recibir un equipo y anotar su condición.</a>
+        <a class="acceso" href="equipos.html"><strong>Administrar equipos</strong>Alta, edición, mantenimiento y baja.</a>
+        <a class="acceso" href="solicitantes.html"><strong>Solicitantes</strong>Personas que pueden pedir equipo.</a>
+        <a class="acceso" href="consultas.html"><strong>Consultas</strong>Disponibles, activos, vencidos e historial.</a>
+        <a class="acceso" href="consultas.html#vencidos"><strong>Ver vencidos</strong>Préstamos cuya fecha de devolución ya pasó.</a>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Préstamos que vencen pronto</h2>
+      <div class="tabla-scroll">
+        <table>
+          <thead><tr><th>Equipo</th><th>Solicitante</th><th>Departamento</th><th>Devolución prevista</th><th>Estado</th></tr></thead>
+          <tbody>
+            <tr><td>INV-014 · Proyector Epson PowerLite</td><td>María López Ruiz</td><td>Ciencias Básicas</td><td>18/11/2026</td><td><span class="estado vencido">Vencido</span></td></tr>
+            <tr><td>INV-003 · Laptop Dell Latitude 5440</td><td>Jorge Pérez Díaz</td><td>Sistemas y Computación</td><td>20/11/2026</td><td><span class="estado prestado">Activo</span></td></tr>
+            <tr><td>INV-021 · Kit Arduino Uno</td><td>Laura Gómez Silva</td><td>Eléctrica y Electrónica</td><td>21/11/2026</td><td><span class="estado prestado">Activo</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">Taller de Base de Datos · TecNM Campus Colima · Datos de ejemplo</footer>
+  <script src="js/app.js"></script>
+</body>
+</html>

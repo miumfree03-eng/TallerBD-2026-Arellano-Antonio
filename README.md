@@ -96,12 +96,30 @@ mariadb -u <usuario> -p < sql/01_estructura.sql
 
 Crea la base `prestamos_equipo` con sus 7 tablas, llaves primarias y foráneas, restricciones `CHECK` e índices. Lo probé en MariaDB 12.3.
 
+## Frontend (`public/`)
+
+| Página | Función | Operación que hará con MariaDB |
+|---|---|---|
+| `login.html` | Inicio de sesión del encargado | Verificar usuario y rol (`ADMIN` / `CONSULTA`) |
+| `index.html` | Panel con indicadores y accesos rápidos | Conteos por estado y préstamos vencidos |
+| `equipos.html` | Alta y edición de equipos, filtro por estado | `INSERT` / `UPDATE` / `SELECT` con `JOIN` a categoría |
+| `solicitantes.html` | Alta de solicitantes y listado | `INSERT` / `SELECT` con `JOIN` a departamento |
+| `prestamos.html` | Registrar préstamo (solo equipos disponibles) y ver activos | Transacción: `INSERT` en préstamo + `UPDATE` del equipo |
+| `devoluciones.html` | Registrar devolución con su condición | `UPDATE` del préstamo y del estado del equipo |
+| `consultas.html` | Las 5 consultas: general, disponibles, activos, vencidos e historial | `SELECT` con `JOIN` y filtros |
+
+- `css/estilos.css`: diseño **responsivo** sin frameworks (escritorio, tableta y celular; menú hamburguesa en pantallas chicas).
+- `js/app.js`: menú móvil, filtros de tablas, pestañas y validación de formularios (campos obligatorios, formatos y fecha de devolución no anterior a hoy).
+- Los datos de las tablas son **de ejemplo**; en el avance del backend se reemplazan por consultas PHP + MariaDB.
+
+Para verlo en local: `python -m http.server 8765 --directory public` y abrir http://localhost:8765.
+
 ## Avances
 
 | Fecha | Entrega | Estado |
 |---|---|---|
 | 13 nov | Registro del repositorio | ✅ |
 | 16 nov | Estructura de la base de datos (DDL) | ✅ `sql/01_estructura.sql` |
-| 20 nov | Frontend | ⬜ |
+| 20 nov | Frontend | ✅ `public/` |
 | 27 nov | Backend PHP y operaciones con MariaDB | ⬜ |
 | 4 dic | Aplicación completa, script SQL y manual | ⬜ |
