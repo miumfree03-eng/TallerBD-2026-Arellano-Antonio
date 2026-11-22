@@ -5,8 +5,8 @@
    - Filtros de búsqueda en tablas
    - Pestañas de la página de consultas
    - Validación de formularios antes de enviarlos
-   En el avance del backend, los formularios se enviarán a PHP;
-   la validación de aquí solo ayuda al usuario, PHP y MariaDB validan de nuevo.
+   Los formularios se envían a PHP; la validación de aquí solo ayuda
+   al usuario, porque PHP y MariaDB vuelven a validar todo.
    ===================================================================== */
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -88,7 +88,6 @@ function mostrarPestana(idPanel) {
 function activarValidaciones() {
   document.querySelectorAll("form[data-validar]").forEach(function (formulario) {
     formulario.addEventListener("submit", function (evento) {
-      evento.preventDefault();               // sin backend todavía: no se envía
       limpiarErrores(formulario);
       let valido = true;
 
@@ -108,13 +107,15 @@ function activarValidaciones() {
         mostrarError(prevista, "La devolución prevista no puede ser anterior a hoy.");
       }
 
-      const aviso = formulario.querySelector(".aviso-formulario");
-      if (aviso) {
-        aviso.className = "aviso aviso-formulario " + (valido ? "exito" : "error");
-        aviso.textContent = valido
-          ? "Datos válidos. En el avance del backend este formulario se guardará en MariaDB."
-          : "Revisa los campos marcados en rojo.";
-        aviso.hidden = false;
+      // Si hay errores no se envía; si todo está bien, el formulario llega a PHP, que valida otra vez
+      if (!valido) {
+        evento.preventDefault();
+        const aviso = formulario.querySelector(".aviso-formulario");
+        if (aviso) {
+          aviso.className = "aviso aviso-formulario error";
+          aviso.textContent = "Revisa los campos marcados en rojo.";
+          aviso.hidden = false;
+        }
       }
     });
   });

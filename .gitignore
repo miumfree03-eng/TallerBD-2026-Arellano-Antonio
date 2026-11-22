@@ -1,0 +1,6 @@
+# Credenciales reales del servidor: nunca se suben
+config/config.php
+.env
+*.log
+.DS_Store
+Thumbs.db
