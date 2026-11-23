@@ -87,108 +87,114 @@ $equipos = consulta('SELECT e.id_equipo, e.num_inventario, e.descripcion, c.nomb
 
 encabezado('Equipos');
 ?>
-<h1>Equipos</h1>
-<p class="subtitulo">Cada equipo físico se registra por separado con su número de inventario.</p>
-
-<div class="dos-columnas">
+<div class="row g-4">
   <?php if (es_admin()): ?>
-  <section class="tarjeta">
-    <h2><?= $editar ? 'Editar equipo ' . e($editar['num_inventario']) : 'Registrar equipo' ?></h2>
-    <form method="post" data-validar novalidate>
-      <?= campo_csrf() ?>
-      <input type="hidden" name="accion" value="guardar">
-      <input type="hidden" name="id_equipo" value="<?= (int) ($editar['id_equipo'] ?? 0) ?>">
-      <div class="aviso aviso-formulario" hidden></div>
-      <div class="campo">
-        <label for="num_inventario">Número de inventario</label>
-        <input id="num_inventario" name="num_inventario" type="text" required pattern="INV-[0-9]{3,6}"
-               data-mensaje="Usa el formato INV-001." value="<?= e($editar['num_inventario'] ?? '') ?>" placeholder="INV-001">
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><?= $editar ? 'Editar ' . e($editar['num_inventario']) : 'Nuevo equipo' ?></div>
+      <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+          <?= campo_csrf() ?>
+          <input type="hidden" name="accion" value="guardar">
+          <input type="hidden" name="id_equipo" value="<?= (int) ($editar['id_equipo'] ?? 0) ?>">
+          <div class="mb-3">
+            <label for="num_inventario" class="form-label">No. de inventario</label>
+            <input id="num_inventario" name="num_inventario" class="form-control" required pattern="INV-[0-9]{3,6}"
+                   value="<?= e($editar['num_inventario'] ?? '') ?>" placeholder="INV-001">
+            <div class="invalid-feedback">Formato INV-001</div>
+          </div>
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <input id="descripcion" name="descripcion" class="form-control" required minlength="3" value="<?= e($editar['descripcion'] ?? '') ?>">
+            <div class="invalid-feedback">Campo obligatorio</div>
+          </div>
+          <div class="mb-3">
+            <label for="id_categoria" class="form-label">Categoría</label>
+            <select id="id_categoria" name="id_categoria" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <?php foreach ($categorias as $c): ?>
+                <option value="<?= $c['id_categoria'] ?>" <?= ($editar['id_categoria'] ?? 0) == $c['id_categoria'] ? 'selected' : '' ?>><?= e($c['nombre']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col"><label for="marca" class="form-label">Marca</label><input id="marca" name="marca" class="form-control" value="<?= e($editar['marca'] ?? '') ?>"></div>
+            <div class="col"><label for="modelo" class="form-label">Modelo</label><input id="modelo" name="modelo" class="form-control" value="<?= e($editar['modelo'] ?? '') ?>"></div>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col">
+              <label for="condicion" class="form-label">Condición</label>
+              <select id="condicion" name="condicion" class="form-select" required>
+                <?php foreach ($CONDICIONES as $valor => $texto): ?>
+                  <option value="<?= $valor ?>" <?= ($editar['condicion'] ?? 'BUENA') === $valor ? 'selected' : '' ?>><?= $texto ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col">
+              <label for="estado" class="form-label">Estado</label>
+              <select id="estado" name="estado" class="form-select" required>
+                <?php foreach ($ESTADOS as $valor => $texto):
+                    if ($valor === 'PRESTADO' && ($editar['estado'] ?? '') !== 'PRESTADO') continue; ?>
+                  <option value="<?= $valor ?>" <?= ($editar['estado'] ?? 'DISPONIBLE') === $valor ? 'selected' : '' ?>><?= $texto ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="motivo" class="form-label">Motivo de mantenimiento</label>
+            <input id="motivo" name="motivo" class="form-control" maxlength="255" placeholder="Opcional">
+          </div>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Guardar</button>
+          <?php if ($editar): ?><a class="btn btn-outline-secondary" href="equipos.php">Cancelar</a><?php endif; ?>
+        </form>
       </div>
-      <div class="campo">
-        <label for="descripcion">Descripción</label>
-        <input id="descripcion" name="descripcion" type="text" required minlength="3" value="<?= e($editar['descripcion'] ?? '') ?>">
-      </div>
-      <div class="campo">
-        <label for="id_categoria">Categoría</label>
-        <select id="id_categoria" name="id_categoria" required>
-          <option value="">Selecciona…</option>
-          <?php foreach ($categorias as $c): ?>
-            <option value="<?= $c['id_categoria'] ?>" <?= ($editar['id_categoria'] ?? 0) == $c['id_categoria'] ? 'selected' : '' ?>><?= e($c['nombre']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div class="fila-campos">
-        <div class="campo"><label for="marca">Marca</label><input id="marca" name="marca" type="text" value="<?= e($editar['marca'] ?? '') ?>"></div>
-        <div class="campo"><label for="modelo">Modelo</label><input id="modelo" name="modelo" type="text" value="<?= e($editar['modelo'] ?? '') ?>"></div>
-      </div>
-      <div class="fila-campos">
-        <div class="campo">
-          <label for="condicion">Condición</label>
-          <select id="condicion" name="condicion" required>
-            <?php foreach ($CONDICIONES as $valor => $texto): ?>
-              <option value="<?= $valor ?>" <?= ($editar['condicion'] ?? 'BUENA') === $valor ? 'selected' : '' ?>><?= $texto ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-        <div class="campo">
-          <label for="estado">Estado</label>
-          <select id="estado" name="estado" required>
-            <?php foreach ($ESTADOS as $valor => $texto):
-                if ($valor === 'PRESTADO' && ($editar['estado'] ?? '') !== 'PRESTADO') continue; ?>
-              <option value="<?= $valor ?>" <?= ($editar['estado'] ?? 'DISPONIBLE') === $valor ? 'selected' : '' ?>><?= $texto ?></option>
-            <?php endforeach; ?>
-          </select>
-        </div>
-      </div>
-      <div class="campo">
-        <label for="motivo">Motivo (si se envía a mantenimiento)</label>
-        <input id="motivo" name="motivo" type="text" maxlength="255" placeholder="Ej.: no enciende la pantalla">
-      </div>
-      <div class="botones">
-        <button class="boton" type="submit">Guardar</button>
-        <?php if ($editar): ?><a class="boton secundario" href="equipos.php">Cancelar</a><?php endif; ?>
-      </div>
-    </form>
-  </section>
+    </div>
+  </div>
   <?php endif; ?>
 
-  <section class="tarjeta">
-    <h2>Equipos registrados</h2>
-    <div class="barra-tabla">
-      <input type="search" placeholder="Buscar por inventario, descripción o marca…" data-filtro="#tabla-equipos" aria-label="Buscar equipos">
-      <select data-filtro-estado="#tabla-equipos" aria-label="Filtrar por estado">
-        <option value="">Todos los estados</option>
-        <?php foreach ($ESTADOS as $valor => $texto): ?><option value="<?= $valor ?>"><?= $texto ?></option><?php endforeach; ?>
-      </select>
+  <div class="<?= es_admin() ? 'col-lg-8' : 'col-12' ?>">
+    <div class="card">
+      <div class="card-header">Inventario</div>
+      <div class="card-body pb-0">
+        <div class="row g-2 mb-3">
+          <div class="col-sm-8"><input type="search" class="form-control" placeholder="Buscar..." data-filtro="#tabla-equipos"></div>
+          <div class="col-sm-4">
+            <select class="form-select" data-filtro-estado="#tabla-equipos">
+              <option value="">Todos</option>
+              <?php foreach ($ESTADOS as $valor => $texto): ?><option value="<?= $valor ?>"><?= $texto ?></option><?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0" id="tabla-equipos">
+          <thead><tr><th>Inventario</th><th>Descripción</th><th>Categoría</th><th>Condición</th><th>Estado</th><?php if (es_admin()): ?><th></th><?php endif; ?></tr></thead>
+          <tbody>
+          <?php foreach ($equipos as $eq): ?>
+            <tr data-fila data-estado="<?= e($eq['estado']) ?>">
+              <td><?= e($eq['num_inventario']) ?></td>
+              <td><?= e($eq['descripcion']) ?><div class="small text-body-secondary"><?= e(trim($eq['marca'] . ' ' . $eq['modelo'])) ?></div></td>
+              <td><?= e($eq['categoria']) ?></td>
+              <td><?= e($CONDICIONES[$eq['condicion']]) ?></td>
+              <td><?= badge_estado($eq['estado']) ?></td>
+              <?php if (es_admin()): ?>
+              <td class="text-nowrap tabla-acciones">
+                <a class="btn btn-sm btn-outline-primary" href="equipos.php?editar=<?= $eq['id_equipo'] ?>" title="Editar"><i class="bi bi-pencil"></i></a>
+                <form method="post" onsubmit="return confirm('¿Eliminar el equipo <?= e($eq['num_inventario']) ?>?');">
+                  <?= campo_csrf() ?>
+                  <input type="hidden" name="accion" value="eliminar">
+                  <input type="hidden" name="id_equipo" value="<?= $eq['id_equipo'] ?>">
+                  <button class="btn btn-sm btn-outline-danger" type="submit" title="Eliminar"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+              <?php endif; ?>
+            </tr>
+          <?php endforeach; ?>
+          <?php if (!$equipos): ?><tr><td colspan="6" class="text-center text-body-secondary py-3">Sin equipos registrados.</td></tr><?php endif; ?>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="tabla-scroll">
-      <table id="tabla-equipos">
-        <thead><tr><th>Inventario</th><th>Descripción</th><th>Categoría</th><th>Condición</th><th>Estado</th><?php if (es_admin()): ?><th>Acciones</th><?php endif; ?></tr></thead>
-        <tbody>
-        <?php foreach ($equipos as $eq): ?>
-          <tr data-estado="<?= e($eq['estado']) ?>">
-            <td><?= e($eq['num_inventario']) ?></td>
-            <td><?= e($eq['descripcion']) ?><br><small><?= e(trim($eq['marca'] . ' ' . $eq['modelo'])) ?></small></td>
-            <td><?= e($eq['categoria']) ?></td>
-            <td><?= e($CONDICIONES[$eq['condicion']]) ?></td>
-            <td><span class="estado <?= strtolower($eq['estado']) ?>"><?= e($ESTADOS[$eq['estado']]) ?></span></td>
-            <?php if (es_admin()): ?>
-            <td class="botones">
-              <a class="boton chico secundario" href="equipos.php?editar=<?= $eq['id_equipo'] ?>">Editar</a>
-              <form method="post" onsubmit="return confirm('¿Eliminar este equipo?');">
-                <?= campo_csrf() ?>
-                <input type="hidden" name="accion" value="eliminar">
-                <input type="hidden" name="id_equipo" value="<?= $eq['id_equipo'] ?>">
-                <button class="boton chico peligro" type="submit">Eliminar</button>
-              </form>
-            </td>
-            <?php endif; ?>
-          </tr>
-        <?php endforeach; ?>
-          <tr class="sin-resultados-fila" <?= $equipos ? 'hidden' : '' ?>><td colspan="6" class="sin-resultados">No hay equipos que coincidan.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  </div>
 </div>
 <?php pie();

@@ -52,73 +52,80 @@ $solicitantes = consulta(
 
 encabezado('Solicitantes');
 ?>
-<h1>Solicitantes</h1>
-<p class="subtitulo">Personas de la institución que pueden pedir equipo prestado.</p>
-
-<div class="dos-columnas">
+<div class="row g-4">
   <?php if (es_admin()): ?>
-  <section class="tarjeta">
-    <h2><?= $editar ? 'Editar solicitante' : 'Registrar solicitante' ?></h2>
-    <form method="post" data-validar novalidate>
-      <?= campo_csrf() ?>
-      <input type="hidden" name="accion" value="guardar">
-      <input type="hidden" name="id_solicitante" value="<?= (int) ($editar['id_solicitante'] ?? 0) ?>">
-      <div class="aviso aviso-formulario" hidden></div>
-      <div class="campo">
-        <label for="num_institucional">Número institucional o de empleado</label>
-        <input id="num_institucional" name="num_institucional" type="text" required pattern="[A-Za-z0-9]{4,20}"
-               data-mensaje="Solo letras y números, de 4 a 20 caracteres." value="<?= e($editar['num_institucional'] ?? '') ?>">
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header"><?= $editar ? 'Editar solicitante' : 'Nuevo solicitante' ?></div>
+      <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+          <?= campo_csrf() ?>
+          <input type="hidden" name="accion" value="guardar">
+          <input type="hidden" name="id_solicitante" value="<?= (int) ($editar['id_solicitante'] ?? 0) ?>">
+          <div class="mb-3">
+            <label for="num_institucional" class="form-label">No. de empleado o control</label>
+            <input id="num_institucional" name="num_institucional" class="form-control" required pattern="[A-Za-z0-9]{4,20}"
+                   value="<?= e($editar['num_institucional'] ?? '') ?>">
+            <div class="invalid-feedback">Solo letras y números (4 a 20)</div>
+          </div>
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre(s)</label>
+            <input id="nombre" name="nombre" class="form-control" required value="<?= e($editar['nombre'] ?? '') ?>">
+          </div>
+          <div class="mb-3">
+            <label for="apellidos" class="form-label">Apellidos</label>
+            <input id="apellidos" name="apellidos" class="form-control" required value="<?= e($editar['apellidos'] ?? '') ?>">
+          </div>
+          <div class="mb-3">
+            <label for="id_departamento" class="form-label">Departamento</label>
+            <select id="id_departamento" name="id_departamento" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <?php foreach ($departamentos as $d): ?>
+                <option value="<?= $d['id_departamento'] ?>" <?= ($editar['id_departamento'] ?? 0) == $d['id_departamento'] ? 'selected' : '' ?>><?= e($d['nombre']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Guardar</button>
+          <?php if ($editar): ?><a class="btn btn-outline-secondary" href="solicitantes.php">Cancelar</a><?php endif; ?>
+        </form>
       </div>
-      <div class="fila-campos">
-        <div class="campo"><label for="nombre">Nombre(s)</label><input id="nombre" name="nombre" type="text" required value="<?= e($editar['nombre'] ?? '') ?>"></div>
-        <div class="campo"><label for="apellidos">Apellidos</label><input id="apellidos" name="apellidos" type="text" required value="<?= e($editar['apellidos'] ?? '') ?>"></div>
-      </div>
-      <div class="campo">
-        <label for="id_departamento">Departamento o área</label>
-        <select id="id_departamento" name="id_departamento" required>
-          <option value="">Selecciona…</option>
-          <?php foreach ($departamentos as $d): ?>
-            <option value="<?= $d['id_departamento'] ?>" <?= ($editar['id_departamento'] ?? 0) == $d['id_departamento'] ? 'selected' : '' ?>><?= e($d['nombre']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div class="botones">
-        <button class="boton" type="submit">Guardar</button>
-        <?php if ($editar): ?><a class="boton secundario" href="solicitantes.php">Cancelar</a><?php endif; ?>
-      </div>
-    </form>
-  </section>
+    </div>
+  </div>
   <?php endif; ?>
 
-  <section class="tarjeta">
-    <h2>Solicitantes registrados</h2>
-    <div class="barra-tabla">
-      <input type="search" placeholder="Buscar por nombre, número o departamento…" data-filtro="#tabla-solicitantes" aria-label="Buscar solicitantes">
+  <div class="<?= es_admin() ? 'col-lg-8' : 'col-12' ?>">
+    <div class="card">
+      <div class="card-header">Registrados</div>
+      <div class="card-body pb-0">
+        <input type="search" class="form-control mb-3" placeholder="Buscar..." data-filtro="#tabla-solicitantes">
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0" id="tabla-solicitantes">
+          <thead><tr><th>Número</th><th>Nombre</th><th>Departamento</th><th class="text-center">Activos</th><th></th></tr></thead>
+          <tbody>
+          <?php foreach ($solicitantes as $s): ?>
+            <tr data-fila>
+              <td><?= e($s['num_institucional']) ?></td>
+              <td><?= e($s['nombre']) ?><?= $s['activo'] ? '' : ' <span class="badge text-bg-secondary">Inactivo</span>' ?></td>
+              <td><?= e($s['departamento']) ?></td>
+              <td class="text-center"><?= (int) $s['activos'] ?></td>
+              <td class="text-nowrap tabla-acciones">
+                <a class="btn btn-sm btn-outline-secondary" href="consultas.php?buscar_por=solicitante&id=<?= $s['id_solicitante'] ?>#historial" title="Historial"><i class="bi bi-clock-history"></i></a>
+                <?php if (es_admin()): ?>
+                  <a class="btn btn-sm btn-outline-primary" href="solicitantes.php?editar=<?= $s['id_solicitante'] ?>" title="Editar"><i class="bi bi-pencil"></i></a>
+                  <form method="post"><?= campo_csrf() ?><input type="hidden" name="accion" value="desactivar"><input type="hidden" name="id_solicitante" value="<?= $s['id_solicitante'] ?>">
+                    <button class="btn btn-sm btn-outline-warning" type="submit" title="<?= $s['activo'] ? 'Desactivar' : 'Activar' ?>"><i class="bi <?= $s['activo'] ? 'bi-person-dash' : 'bi-person-check' ?>"></i></button></form>
+                  <form method="post" onsubmit="return confirm('¿Eliminar a <?= e($s['nombre']) ?>?');"><?= campo_csrf() ?><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="id_solicitante" value="<?= $s['id_solicitante'] ?>">
+                    <button class="btn btn-sm btn-outline-danger" type="submit" title="Eliminar"><i class="bi bi-trash"></i></button></form>
+                <?php endif; ?>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+          <?php if (!$solicitantes): ?><tr><td colspan="5" class="text-center text-body-secondary py-3">Sin solicitantes.</td></tr><?php endif; ?>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="tabla-scroll">
-      <table id="tabla-solicitantes">
-        <thead><tr><th>Número</th><th>Nombre</th><th>Departamento</th><th>Préstamos activos</th><th>Acciones</th></tr></thead>
-        <tbody>
-        <?php foreach ($solicitantes as $s): ?>
-          <tr>
-            <td><?= e($s['num_institucional']) ?></td>
-            <td><?= e($s['nombre']) ?><?= $s['activo'] ? '' : ' <span class="estado baja">Inactivo</span>' ?></td>
-            <td><?= e($s['departamento']) ?></td>
-            <td><?= (int) $s['activos'] ?></td>
-            <td class="botones">
-              <a class="boton chico secundario" href="consultas.php?buscar_por=solicitante&id=<?= $s['id_solicitante'] ?>#historial">Historial</a>
-              <?php if (es_admin()): ?>
-                <a class="boton chico secundario" href="solicitantes.php?editar=<?= $s['id_solicitante'] ?>">Editar</a>
-                <form method="post"><?= campo_csrf() ?><input type="hidden" name="accion" value="desactivar"><input type="hidden" name="id_solicitante" value="<?= $s['id_solicitante'] ?>"><button class="boton chico secundario" type="submit"><?= $s['activo'] ? 'Desactivar' : 'Activar' ?></button></form>
-                <form method="post" onsubmit="return confirm('¿Eliminar este solicitante?');"><?= campo_csrf() ?><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="id_solicitante" value="<?= $s['id_solicitante'] ?>"><button class="boton chico peligro" type="submit">Eliminar</button></form>
-              <?php endif; ?>
-            </td>
-          </tr>
-        <?php endforeach; ?>
-          <tr class="sin-resultados-fila" <?= $solicitantes ? 'hidden' : '' ?>><td colspan="5" class="sin-resultados">No hay solicitantes que coincidan.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  </div>
 </div>
 <?php pie();

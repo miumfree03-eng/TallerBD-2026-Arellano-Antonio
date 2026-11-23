@@ -65,62 +65,64 @@ $ultimas = consulta(
 
 encabezado('Devoluciones');
 ?>
-<h1>Devoluciones</h1>
-<p class="subtitulo">Registra que un equipo regresó y en qué condición.</p>
-
-<div class="dos-columnas">
+<div class="row g-4">
   <?php if (es_admin()): ?>
-  <section class="tarjeta">
-    <h2>Registrar devolución</h2>
-    <form method="post" data-validar novalidate>
-      <?= campo_csrf() ?>
-      <div class="aviso aviso-formulario" hidden></div>
-      <div class="campo">
-        <label for="id_prestamo">Préstamo activo</label>
-        <select id="id_prestamo" name="id_prestamo" required>
-          <option value="">Selecciona el préstamo…</option>
-          <?php foreach ($activos as $p): ?>
-            <option value="<?= $p['id_prestamo'] ?>"><?= e($p['num_inventario'] . ' · ' . $p['descripcion'] . ' — ' . $p['solicitante'] . ($p['vencido'] ? ' (vencido)' : '')) ?></option>
-          <?php endforeach; ?>
-        </select>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">Registrar devolución</div>
+      <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+          <?= campo_csrf() ?>
+          <div class="mb-3">
+            <label for="id_prestamo" class="form-label">Préstamo</label>
+            <select id="id_prestamo" name="id_prestamo" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <?php foreach ($activos as $p): ?>
+                <option value="<?= $p['id_prestamo'] ?>"><?= e($p['num_inventario'] . ' - ' . $p['solicitante'] . ($p['vencido'] ? ' (vencido)' : '')) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="condicion_devolucion" class="form-label">Condición</label>
+            <select id="condicion_devolucion" name="condicion_devolucion" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <option value="BUENA">Buena</option>
+              <option value="REGULAR">Regular</option>
+              <option value="DANADA">Dañada (pasa a mantenimiento)</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="obs_devolucion" class="form-label">Observaciones</label>
+            <textarea id="obs_devolucion" name="observaciones" class="form-control" rows="3" maxlength="200"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Registrar</button>
+        </form>
       </div>
-      <div class="campo">
-        <label for="condicion_devolucion">Condición en que regresó</label>
-        <select id="condicion_devolucion" name="condicion_devolucion" required>
-          <option value="">Selecciona…</option>
-          <option value="BUENA">Buena: vuelve a estar disponible</option>
-          <option value="REGULAR">Regular: disponible, con observaciones</option>
-          <option value="DANADA">Dañada: se envía a mantenimiento</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label for="obs_devolucion">Observaciones</label>
-        <textarea id="obs_devolucion" name="observaciones" rows="3" maxlength="200" placeholder="Ej.: regresó sin cable HDMI"></textarea>
-      </div>
-      <div class="botones"><button class="boton" type="submit">Registrar devolución</button></div>
-    </form>
-  </section>
+    </div>
+  </div>
   <?php endif; ?>
 
-  <section class="tarjeta">
-    <h2>Últimas devoluciones</h2>
-    <div class="tabla-scroll">
-      <table>
-        <thead><tr><th>Equipo</th><th>Solicitante</th><th>Devuelto</th><th>Condición</th><th>Recibió</th></tr></thead>
-        <tbody>
-        <?php foreach ($ultimas as $d): ?>
-          <tr>
-            <td><?= e($d['num_inventario'] . ' · ' . $d['descripcion']) ?></td>
-            <td><?= e($d['solicitante']) ?></td>
-            <td><?= fecha_mx($d['fecha_devolucion_real']) ?></td>
-            <td><?= $d['condicion_devolucion'] === 'DANADA' ? '<span class="estado mantenimiento">Dañada</span>' : e($CONDICIONES[$d['condicion_devolucion']]) ?></td>
-            <td><?= e($d['recibio']) ?></td>
-          </tr>
-        <?php endforeach; ?>
-        <?php if (!$ultimas): ?><tr><td colspan="5" class="sin-resultados">Todavía no hay devoluciones.</td></tr><?php endif; ?>
-        </tbody>
-      </table>
+  <div class="<?= es_admin() ? 'col-lg-8' : 'col-12' ?>">
+    <div class="card">
+      <div class="card-header">Últimas devoluciones</div>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+          <thead><tr><th>Equipo</th><th>Solicitante</th><th>Fecha</th><th>Condición</th><th>Recibió</th></tr></thead>
+          <tbody>
+          <?php foreach ($ultimas as $d): ?>
+            <tr>
+              <td><strong><?= e($d['num_inventario']) ?></strong> <?= e($d['descripcion']) ?></td>
+              <td><?= e($d['solicitante']) ?></td>
+              <td><?= fecha_mx($d['fecha_devolucion_real']) ?></td>
+              <td><?= $d['condicion_devolucion'] === 'DANADA' ? '<span class="badge text-bg-warning">Dañada</span>' : e($CONDICIONES[$d['condicion_devolucion']]) ?></td>
+              <td><?= e($d['recibio']) ?></td>
+            </tr>
+          <?php endforeach; ?>
+          <?php if (!$ultimas): ?><tr><td colspan="5" class="text-center text-body-secondary py-3">Sin devoluciones.</td></tr><?php endif; ?>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </section>
+  </div>
 </div>
 <?php pie();

@@ -148,8 +148,9 @@ Para probar en local sin Apache: `php -S 127.0.0.1:8770 -t public`.
 
 ## Frontend
 
-- `public/css/estilos.css`: diseño **responsivo** sin frameworks para escritorio, tableta y celular, con menú hamburguesa en pantallas chicas.
-- `public/js/app.js`: menú móvil, filtros de tablas, pestañas y validación de formularios antes de enviarlos a PHP. PHP y MariaDB vuelven a validar.
+- Interfaz con **Bootstrap 5.3** y **Bootstrap Icons**, basada en el ejemplo "Dashboard" de getbootstrap.com: barra superior, menú lateral que en celular se vuelve panel deslizable, tarjetas, tablas y pestañas. Las librerías van dentro de `public/vendor/` para que funcione sin internet.
+- `public/css/estilos.css`: pocos ajustes sobre Bootstrap (menú lateral).
+- `public/js/app.js`: validación de formularios con el patrón de Bootstrap, filtros de tablas y fecha mínima. PHP y MariaDB vuelven a validar todo.
 
 ## Avances
 

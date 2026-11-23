@@ -52,79 +52,83 @@ if (!empty($_GET['id'])) {
 
 encabezado('Consultas');
 ?>
-<h1>Consultas</h1>
-<p class="subtitulo">Las cinco consultas que pidió el departamento.</p>
+<ul class="nav nav-tabs" role="tablist">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#general" type="button">Equipos</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#disponibles" type="button">Disponibles</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#activos" type="button">Préstamos activos</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#vencidos" type="button">Vencidos <?php if ($vencidos): ?><span class="badge text-bg-danger"><?= count($vencidos) ?></span><?php endif; ?></button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#historial" type="button">Historial</button></li>
+</ul>
 
-<section class="tarjeta">
-  <div class="pestanas" role="tablist">
-    <button class="pestana activa" type="button" data-panel="general">1. Todos los equipos</button>
-    <button class="pestana" type="button" data-panel="disponibles">2. Disponibles</button>
-    <button class="pestana" type="button" data-panel="activos">3. Préstamos activos</button>
-    <button class="pestana" type="button" data-panel="vencidos">4. Vencidos</button>
-    <button class="pestana" type="button" data-panel="historial">5. Historial</button>
+<div class="tab-content border border-top-0 rounded-bottom bg-body p-3">
+  <div class="tab-pane fade show active" id="general">
+    <div class="table-responsive"><table class="table table-sm table-striped mb-0">
+      <thead><tr><th>Inventario</th><th>Descripción</th><th>Categoría</th><th>Condición</th><th>Estado</th></tr></thead>
+      <tbody><?php foreach ($general as $r): ?>
+        <tr><td><?= e($r['num_inventario']) ?></td><td><?= e($r['descripcion']) ?></td><td><?= e($r['categoria']) ?></td>
+            <td><?= e($CONDICIONES[$r['condicion']]) ?></td><td><?= badge_estado($r['estado']) ?></td></tr>
+      <?php endforeach; ?></tbody></table></div>
   </div>
 
-  <div class="panel-pestana activo" id="general"><div class="tabla-scroll"><table>
-    <thead><tr><th>Inventario</th><th>Descripción</th><th>Categoría</th><th>Condición</th><th>Estado</th></tr></thead>
-    <tbody><?php foreach ($general as $r): ?>
-      <tr><td><?= e($r['num_inventario']) ?></td><td><?= e($r['descripcion']) ?></td><td><?= e($r['categoria']) ?></td>
-          <td><?= e($CONDICIONES[$r['condicion']]) ?></td><td><span class="estado <?= strtolower($r['estado']) ?>"><?= e($ESTADOS[$r['estado']]) ?></span></td></tr>
-    <?php endforeach; ?></tbody></table></div></div>
+  <div class="tab-pane fade" id="disponibles">
+    <div class="table-responsive"><table class="table table-sm table-striped mb-0">
+      <thead><tr><th>Inventario</th><th>Descripción</th><th>Categoría</th><th>Marca / modelo</th></tr></thead>
+      <tbody><?php foreach ($disponibles as $r): ?>
+        <tr><td><?= e($r['num_inventario']) ?></td><td><?= e($r['descripcion']) ?></td><td><?= e($r['categoria']) ?></td><td><?= e($r['marca_modelo']) ?></td></tr>
+      <?php endforeach; ?>
+      <?php if (!$disponibles): ?><tr><td colspan="4" class="text-center text-body-secondary">No hay equipos disponibles.</td></tr><?php endif; ?></tbody></table></div>
+  </div>
 
-  <div class="panel-pestana" id="disponibles"><div class="tabla-scroll"><table>
-    <thead><tr><th>Inventario</th><th>Descripción</th><th>Categoría</th><th>Marca / modelo</th></tr></thead>
-    <tbody><?php foreach ($disponibles as $r): ?>
-      <tr><td><?= e($r['num_inventario']) ?></td><td><?= e($r['descripcion']) ?></td><td><?= e($r['categoria']) ?></td><td><?= e($r['marca_modelo']) ?></td></tr>
-    <?php endforeach; ?>
-    <?php if (!$disponibles): ?><tr><td colspan="4" class="sin-resultados">No hay equipos disponibles.</td></tr><?php endif; ?></tbody></table></div></div>
+  <div class="tab-pane fade" id="activos">
+    <div class="table-responsive"><table class="table table-sm table-striped mb-0">
+      <thead><tr><th>Equipo</th><th>Lo tiene</th><th>Departamento</th><th>Desde</th><th>Devolución</th></tr></thead>
+      <tbody><?php foreach ($activos as $r): ?>
+        <tr><td><?= e($r['num_inventario'] . ' ' . $r['descripcion']) ?></td><td><?= e($r['solicitante']) ?></td><td><?= e($r['departamento']) ?></td>
+            <td><?= fecha_mx($r['fecha_prestamo']) ?></td><td><?= fecha_mx($r['fecha_devolucion_prevista']) ?></td></tr>
+      <?php endforeach; ?>
+      <?php if (!$activos): ?><tr><td colspan="5" class="text-center text-body-secondary">No hay préstamos activos.</td></tr><?php endif; ?></tbody></table></div>
+  </div>
 
-  <div class="panel-pestana" id="activos"><div class="tabla-scroll"><table>
-    <thead><tr><th>Equipo</th><th>Quién lo tiene</th><th>Departamento</th><th>Desde</th><th>Devolución prevista</th></tr></thead>
-    <tbody><?php foreach ($activos as $r): ?>
-      <tr><td><?= e($r['num_inventario'] . ' · ' . $r['descripcion']) ?></td><td><?= e($r['solicitante']) ?></td><td><?= e($r['departamento']) ?></td>
-          <td><?= fecha_mx($r['fecha_prestamo']) ?></td><td><?= fecha_mx($r['fecha_devolucion_prevista']) ?></td></tr>
-    <?php endforeach; ?>
-    <?php if (!$activos): ?><tr><td colspan="5" class="sin-resultados">No hay préstamos activos.</td></tr><?php endif; ?></tbody></table></div></div>
+  <div class="tab-pane fade" id="vencidos">
+    <div class="table-responsive"><table class="table table-sm table-striped mb-0">
+      <thead><tr><th>Equipo</th><th>Lo tiene</th><th>Debía regresar</th><th>Atraso</th></tr></thead>
+      <tbody><?php foreach ($vencidos as $r): ?>
+        <tr><td><?= e($r['num_inventario'] . ' ' . $r['descripcion']) ?></td><td><?= e($r['solicitante']) ?></td>
+            <td><?= fecha_mx($r['fecha_devolucion_prevista']) ?></td>
+            <td><span class="badge text-bg-danger"><?= (int) $r['dias_atraso'] ?> <?= $r['dias_atraso'] == 1 ? 'día' : 'días' ?></span></td></tr>
+      <?php endforeach; ?>
+      <?php if (!$vencidos): ?><tr><td colspan="4" class="text-center text-body-secondary">No hay préstamos vencidos.</td></tr><?php endif; ?></tbody></table></div>
+  </div>
 
-  <div class="panel-pestana" id="vencidos">
-    <div class="aviso info">Préstamos activos cuya fecha de devolución prevista ya pasó.</div>
-    <div class="tabla-scroll"><table>
-    <thead><tr><th>Equipo</th><th>Quién lo tiene</th><th>Devolución prevista</th><th>Días de atraso</th></tr></thead>
-    <tbody><?php foreach ($vencidos as $r): ?>
-      <tr><td><?= e($r['num_inventario'] . ' · ' . $r['descripcion']) ?></td><td><?= e($r['solicitante']) ?></td>
-          <td><?= fecha_mx($r['fecha_devolucion_prevista']) ?></td><td><span class="estado vencido"><?= (int) $r['dias_atraso'] ?> <?= $r['dias_atraso'] == 1 ? 'día' : 'días' ?></span></td></tr>
-    <?php endforeach; ?>
-    <?php if (!$vencidos): ?><tr><td colspan="4" class="sin-resultados">No hay préstamos vencidos.</td></tr><?php endif; ?></tbody></table></div></div>
-
-  <div class="panel-pestana" id="historial">
-    <form class="barra-tabla" method="get" action="consultas.php#historial">
-      <div class="campo" style="margin:0;flex:1;min-width:180px">
-        <label for="buscar_por">Buscar historial por</label>
-        <select id="buscar_por" name="buscar_por" onchange="this.form.id.value=''; this.form.submit()">
+  <div class="tab-pane fade" id="historial">
+    <form class="row g-2 align-items-end mb-3" method="get" action="consultas.php#historial">
+      <div class="col-sm-3">
+        <label for="buscar_por" class="form-label">Buscar por</label>
+        <select id="buscar_por" name="buscar_por" class="form-select" onchange="this.form.id.value=''; this.form.submit()">
           <option value="solicitante" <?= $buscar_por === 'solicitante' ? 'selected' : '' ?>>Solicitante</option>
           <option value="equipo" <?= $buscar_por === 'equipo' ? 'selected' : '' ?>>Equipo</option>
         </select>
       </div>
-      <div class="campo" style="margin:0;flex:2;min-width:220px">
-        <label for="id_historial"><?= $buscar_por === 'equipo' ? 'Equipo' : 'Solicitante' ?></label>
-        <select id="id_historial" name="id">
-          <option value="">Selecciona…</option>
+      <div class="col-sm-6">
+        <label for="id_historial" class="form-label"><?= $buscar_por === 'equipo' ? 'Equipo' : 'Solicitante' ?></label>
+        <select id="id_historial" name="id" class="form-select">
+          <option value="">Seleccionar</option>
           <?php foreach ($opciones as $o): ?>
             <option value="<?= $o['id'] ?>" <?= ($_GET['id'] ?? '') == $o['id'] ? 'selected' : '' ?>><?= e($o['texto']) ?></option>
           <?php endforeach; ?>
         </select>
       </div>
-      <div style="align-self:end"><button class="boton" type="submit">Buscar</button></div>
+      <div class="col-sm-3"><button class="btn btn-primary w-100" type="submit"><i class="bi bi-search"></i> Buscar</button></div>
     </form>
-    <div class="tabla-scroll"><table>
+    <div class="table-responsive"><table class="table table-sm table-striped mb-0">
       <thead><tr><th>Equipo</th><th>Solicitante</th><th>Prestado</th><th>Prevista</th><th>Devuelto</th><th>Condición</th></tr></thead>
       <tbody><?php foreach ($historial as $r): ?>
-        <tr><td><?= e($r['num_inventario'] . ' · ' . $r['descripcion']) ?></td><td><?= e($r['solicitante']) ?></td>
+        <tr><td><?= e($r['num_inventario'] . ' ' . $r['descripcion']) ?></td><td><?= e($r['solicitante']) ?></td>
             <td><?= fecha_mx($r['fecha_prestamo']) ?></td><td><?= fecha_mx($r['fecha_devolucion_prevista']) ?></td>
             <td><?= fecha_mx($r['fecha_devolucion_real']) ?></td>
-            <td><?= $r['fecha_devolucion_real'] ? e($CONDICIONES[$r['condicion_devolucion']]) : '<span class="estado prestado">Activo</span>' ?></td></tr>
+            <td><?= $r['fecha_devolucion_real'] ? e($CONDICIONES[$r['condicion_devolucion']]) : '<span class="badge text-bg-primary">Activo</span>' ?></td></tr>
       <?php endforeach; ?>
-      <?php if (!$historial): ?><tr><td colspan="6" class="sin-resultados"><?= empty($_GET['id']) ? 'Elige una persona o un equipo.' : 'Sin préstamos registrados.' ?></td></tr><?php endif; ?></tbody></table></div>
+      <?php if (!$historial): ?><tr><td colspan="6" class="text-center text-body-secondary"><?= empty($_GET['id']) ? 'Selecciona una persona o un equipo.' : 'Sin préstamos registrados.' ?></td></tr><?php endif; ?></tbody></table></div>
   </div>
-</section>
+</div>
 <?php pie();

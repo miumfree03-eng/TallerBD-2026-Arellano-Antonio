@@ -60,71 +60,74 @@ $activos = consulta(
 
 encabezado('Préstamos');
 ?>
-<h1>Préstamos</h1>
-<p class="subtitulo">Registra la entrega de un equipo. Solo aparecen los equipos disponibles.</p>
-
-<div class="dos-columnas">
+<div class="row g-4">
   <?php if (es_admin()): ?>
-  <section class="tarjeta">
-    <h2>Registrar préstamo</h2>
-    <form method="post" data-validar novalidate>
-      <?= campo_csrf() ?>
-      <div class="aviso aviso-formulario" hidden></div>
-      <div class="campo">
-        <label for="id_equipo">Equipo</label>
-        <select id="id_equipo" name="id_equipo" required>
-          <option value="">Selecciona un equipo disponible…</option>
-          <?php foreach ($disponibles as $eq): ?>
-            <option value="<?= $eq['id_equipo'] ?>"><?= e($eq['num_inventario'] . ' · ' . $eq['descripcion']) ?></option>
-          <?php endforeach; ?>
-        </select>
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-header">Registrar préstamo</div>
+      <div class="card-body">
+        <form method="post" class="needs-validation" novalidate>
+          <?= campo_csrf() ?>
+          <div class="mb-3">
+            <label for="id_equipo" class="form-label">Equipo</label>
+            <select id="id_equipo" name="id_equipo" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <?php foreach ($disponibles as $eq): ?>
+                <option value="<?= $eq['id_equipo'] ?>"><?= e($eq['num_inventario'] . ' - ' . $eq['descripcion']) ?></option>
+              <?php endforeach; ?>
+            </select>
+            <div class="form-text">Solo se listan equipos disponibles.</div>
+          </div>
+          <div class="mb-3">
+            <label for="id_solicitante" class="form-label">Solicitante</label>
+            <select id="id_solicitante" name="id_solicitante" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <?php foreach ($solicitantes as $s): ?>
+                <option value="<?= $s['id_solicitante'] ?>"><?= e($s['num_institucional'] . ' - ' . $s['nombre']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="fecha_devolucion_prevista" class="form-label">Fecha de devolución</label>
+            <input id="fecha_devolucion_prevista" name="fecha_devolucion_prevista" type="date" class="form-control min-hoy" required>
+            <div class="invalid-feedback">Elige una fecha de hoy en adelante</div>
+          </div>
+          <div class="mb-3">
+            <label for="observaciones" class="form-label">Observaciones</label>
+            <textarea id="observaciones" name="observaciones" class="form-control" rows="2" maxlength="255"></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> Registrar</button>
+        </form>
       </div>
-      <div class="campo">
-        <label for="id_solicitante">Solicitante</label>
-        <select id="id_solicitante" name="id_solicitante" required>
-          <option value="">Selecciona…</option>
-          <?php foreach ($solicitantes as $s): ?>
-            <option value="<?= $s['id_solicitante'] ?>"><?= e($s['num_institucional'] . ' · ' . $s['nombre']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <div class="campo">
-        <label for="fecha_devolucion_prevista">Devolución prevista</label>
-        <input id="fecha_devolucion_prevista" name="fecha_devolucion_prevista" type="date" required data-min-hoy>
-        <div class="ayuda">La fecha del préstamo la pone el sistema y la entrega queda a nombre de <?= e($u['usuario']) ?>.</div>
-      </div>
-      <div class="campo">
-        <label for="observaciones">Observaciones</label>
-        <textarea id="observaciones" name="observaciones" rows="2" maxlength="255"></textarea>
-      </div>
-      <div class="botones"><button class="boton" type="submit">Registrar préstamo</button></div>
-    </form>
-  </section>
+    </div>
+  </div>
   <?php endif; ?>
 
-  <section class="tarjeta">
-    <h2>Préstamos activos</h2>
-    <div class="barra-tabla">
-      <input type="search" placeholder="Buscar por equipo o solicitante…" data-filtro="#tabla-activos" aria-label="Buscar préstamos">
+  <div class="<?= es_admin() ? 'col-lg-8' : 'col-12' ?>">
+    <div class="card">
+      <div class="card-header">Préstamos activos</div>
+      <div class="card-body pb-0">
+        <input type="search" class="form-control mb-3" placeholder="Buscar..." data-filtro="#tabla-activos">
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0" id="tabla-activos">
+          <thead><tr><th>Equipo</th><th>Solicitante</th><th>Prestado</th><th>Devolución</th><th>Entregó</th><th></th></tr></thead>
+          <tbody>
+          <?php foreach ($activos as $p): ?>
+            <tr data-fila>
+              <td><strong><?= e($p['num_inventario']) ?></strong> <?= e($p['descripcion']) ?></td>
+              <td><?= e($p['solicitante']) ?></td>
+              <td><?= fecha_mx($p['fecha_prestamo']) ?></td>
+              <td><?= fecha_mx($p['fecha_devolucion_prevista']) ?></td>
+              <td><?= e($p['entrego']) ?></td>
+              <td><?= $p['vencido'] ? '<span class="badge text-bg-danger">Vencido</span>' : '<span class="badge text-bg-primary">Activo</span>' ?></td>
+            </tr>
+          <?php endforeach; ?>
+          <?php if (!$activos): ?><tr><td colspan="6" class="text-center text-body-secondary py-3">No hay préstamos activos.</td></tr><?php endif; ?>
+          </tbody>
+        </table>
+      </div>
     </div>
-    <div class="tabla-scroll">
-      <table id="tabla-activos">
-        <thead><tr><th>Equipo</th><th>Solicitante</th><th>Prestado</th><th>Devolución prevista</th><th>Entregó</th><th>Estado</th></tr></thead>
-        <tbody>
-        <?php foreach ($activos as $p): ?>
-          <tr>
-            <td><?= e($p['num_inventario'] . ' · ' . $p['descripcion']) ?></td>
-            <td><?= e($p['solicitante']) ?></td>
-            <td><?= fecha_mx($p['fecha_prestamo']) ?></td>
-            <td><?= fecha_mx($p['fecha_devolucion_prevista']) ?></td>
-            <td><?= e($p['entrego']) ?></td>
-            <td><?= $p['vencido'] ? '<span class="estado vencido">Vencido</span>' : '<span class="estado prestado">Activo</span>' ?></td>
-          </tr>
-        <?php endforeach; ?>
-          <tr class="sin-resultados-fila" <?= $activos ? 'hidden' : '' ?>><td colspan="6" class="sin-resultados">No hay préstamos activos.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  </div>
 </div>
 <?php pie();

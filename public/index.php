@@ -7,7 +7,7 @@ $por_estado = consulta('SELECT estado, COUNT(*) AS total FROM equipo GROUP BY es
 $vencidos = consulta('SELECT COUNT(*) FROM prestamo
                       WHERE fecha_devolucion_real IS NULL AND fecha_devolucion_prevista < CURRENT_DATE')->fetchColumn();
 
-// Préstamos activos más próximos a vencer (JOIN de 4 tablas)
+// Prestamos activos mas proximos a vencer (JOIN de 4 tablas)
 $proximos = consulta(
     'SELECT e.num_inventario, e.descripcion, CONCAT(s.nombre, " ", s.apellidos) AS solicitante,
             d.nombre AS departamento, p.fecha_devolucion_prevista,
@@ -20,48 +20,52 @@ $proximos = consulta(
      ORDER BY p.fecha_devolucion_prevista
      LIMIT 5')->fetchAll();
 
+$tarjetas = [
+    ['Disponibles', $por_estado['DISPONIBLE'] ?? 0, 'success', 'bi-check-circle', 'consultas.php#disponibles'],
+    ['Prestados', $por_estado['PRESTADO'] ?? 0, 'primary', 'bi-box-arrow-up-right', 'consultas.php#activos'],
+    ['En mantenimiento', $por_estado['MANTENIMIENTO'] ?? 0, 'warning', 'bi-tools', 'equipos.php'],
+    ['Vencidos', $vencidos, 'danger', 'bi-exclamation-triangle', 'consultas.php#vencidos'],
+];
+
 encabezado('Inicio');
 ?>
-<h1>Panel de control</h1>
-<p class="subtitulo">Situación actual de los equipos del departamento.</p>
+<div class="row g-3 mb-4">
+  <?php foreach ($tarjetas as [$texto, $numero, $color, $icono, $enlace]): ?>
+    <div class="col-6 col-xl-3">
+      <a href="<?= $enlace ?>" class="card text-decoration-none shadow-sm border-0 h-100">
+        <div class="card-body d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-body-secondary small"><?= $texto ?></div>
+            <div class="fs-3 fw-semibold"><?= (int) $numero ?></div>
+          </div>
+          <i class="bi <?= $icono ?> fs-2 text-<?= $color ?>"></i>
+        </div>
+      </a>
+    </div>
+  <?php endforeach; ?>
+</div>
 
-<section class="resumen">
-  <div class="indicador verde"><div class="numero"><?= (int) ($por_estado['DISPONIBLE'] ?? 0) ?></div><div class="etiqueta">Disponibles</div></div>
-  <div class="indicador"><div class="numero"><?= (int) ($por_estado['PRESTADO'] ?? 0) ?></div><div class="etiqueta">Prestados</div></div>
-  <div class="indicador ambar"><div class="numero"><?= (int) ($por_estado['MANTENIMIENTO'] ?? 0) ?></div><div class="etiqueta">En mantenimiento</div></div>
-  <div class="indicador rojo"><div class="numero"><?= (int) $vencidos ?></div><div class="etiqueta">Préstamos vencidos</div></div>
-</section>
-
-<section class="tarjeta">
-  <h2>¿Qué quieres hacer?</h2>
-  <div class="accesos">
-    <a class="acceso" href="prestamos.php"><strong>Registrar préstamo</strong>Entregar un equipo disponible a un solicitante.</a>
-    <a class="acceso" href="devoluciones.php"><strong>Registrar devolución</strong>Recibir un equipo y anotar su condición.</a>
-    <a class="acceso" href="equipos.php"><strong>Administrar equipos</strong>Alta, edición, mantenimiento y baja.</a>
-    <a class="acceso" href="solicitantes.php"><strong>Solicitantes</strong>Personas que pueden pedir equipo.</a>
-    <a class="acceso" href="consultas.php"><strong>Consultas</strong>Disponibles, activos, vencidos e historial.</a>
-    <a class="acceso" href="consultas.php#vencidos"><strong>Ver vencidos</strong>Préstamos cuya fecha de devolución ya pasó.</a>
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Préstamos por vencer</span>
+    <?php if (es_admin()): ?><a href="prestamos.php" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg"></i> Nuevo préstamo</a><?php endif; ?>
   </div>
-</section>
-
-<section class="tarjeta">
-  <h2>Préstamos que vencen pronto</h2>
-  <div class="tabla-scroll">
-    <table>
-      <thead><tr><th>Equipo</th><th>Solicitante</th><th>Departamento</th><th>Devolución prevista</th><th>Estado</th></tr></thead>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light"><tr><th>Equipo</th><th>Solicitante</th><th>Departamento</th><th>Devolución</th><th></th></tr></thead>
       <tbody>
       <?php foreach ($proximos as $p): ?>
         <tr>
-          <td><?= e($p['num_inventario'] . ' · ' . $p['descripcion']) ?></td>
+          <td><strong><?= e($p['num_inventario']) ?></strong> <?= e($p['descripcion']) ?></td>
           <td><?= e($p['solicitante']) ?></td>
           <td><?= e($p['departamento']) ?></td>
           <td><?= fecha_mx($p['fecha_devolucion_prevista']) ?></td>
-          <td><?= $p['vencido'] ? '<span class="estado vencido">Vencido</span>' : '<span class="estado prestado">Activo</span>' ?></td>
+          <td><?= $p['vencido'] ? '<span class="badge text-bg-danger">Vencido</span>' : '<span class="badge text-bg-primary">Activo</span>' ?></td>
         </tr>
       <?php endforeach; ?>
-      <?php if (!$proximos): ?><tr><td colspan="5" class="sin-resultados">No hay préstamos activos.</td></tr><?php endif; ?>
+      <?php if (!$proximos): ?><tr><td colspan="5" class="text-center text-body-secondary py-3">No hay préstamos activos.</td></tr><?php endif; ?>
       </tbody>
     </table>
   </div>
-</section>
+</div>
 <?php pie();
